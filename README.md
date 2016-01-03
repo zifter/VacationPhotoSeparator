@@ -42,7 +42,7 @@ After script execution in output directory you will see folders separated by cre
 
     * Pattern for output file path.
     * default: %Y/%m.%d'. For example: OUTPUT/2016/12.01/Image.jpg
-    * Other format argument you can see at https://docs.python.org/2/library/time.html#time.strftime
+    * Other format argument you can see at [python doc](https://docs.python.org/2/library/time.html#time.strftime)
 
 *-l, --log_level*
 
