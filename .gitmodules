@@ -1,0 +1,3 @@
+[submodule "exit_py"]
+	path = exit_py
+	url = https://github.com/ianare/exif-py
