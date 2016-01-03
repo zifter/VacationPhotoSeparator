@@ -26,7 +26,7 @@ def setup_logger(name):
     return logger
 
 
-g_logger = setup_logger('splitter')
+g_logger = setup_logger('separator')
 
 
 class CopyFilePolicy():
@@ -87,7 +87,7 @@ def get_original_date(imgPath):
     #         date = time.strptime(v, DATE_TIME_ORIGINAL_PATTERN)
 
 
-def split(context):
+def separate(context):
     for root, dirs, files in os.walk(context.source):
         for f in files:
             ext = os.path.splitext(f)[1].lower()
@@ -141,7 +141,7 @@ def main():
 
     startTime = datetime.now()
     g_logger.info(" - [Start]")
-    split(context)
+    separate(context)
     g_logger.info(" - [End %s]" % (datetime.now() - startTime))
 
 
