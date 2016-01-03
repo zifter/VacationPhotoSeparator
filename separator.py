@@ -1,17 +1,11 @@
 import time
 import shutil
 import os
-from argparse import ArgumentParser
+import exifread
 import logging
+from argparse import ArgumentParser
 from datetime import datetime
 
-try:
-    import exifread
-except ImportError:
-    # try to add exif-py to path
-    import sys
-    sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), 'exif_py')))
-    from exif_py import exifread
 
 DATE_TIME_ORIGINAL_PATTERN = "%Y:%m:%d %H:%M:%S"
 DATE_TIME_ORIGINAL = 'DateTimeOriginal'
