@@ -9,6 +9,8 @@ try:
     import exifread
 except ImportError:
     # try to add exif-py to path
+    import sys
+    sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), 'exif_py')))
     from exif_py import exifread
 
 DATE_TIME_ORIGINAL_PATTERN = "%Y:%m:%d %H:%M:%S"
@@ -19,7 +21,7 @@ ENCODED_DATE_IN_NAME_PATTERNS = ['%Y%m%d_%H%M%S']
 
 def setup_logger(name):
     logger = logging.getLogger(name)
-    stream = exifread.exif_log.Handler(logging.DEBUG, color=True)
+    stream = logging.StreamHandler()
     logger.addHandler(stream)
     return logger
 
@@ -138,16 +140,16 @@ def main():
     g_logger.debug(context)
 
     startTime = datetime.now()
-    g_logger.info("Start")
+    g_logger.info(" - [Start]")
     split(context)
-    g_logger.info("End [%s]" % (datetime.now() - startTime))
+    g_logger.info(" - [End %s]" % (datetime.now() - startTime))
 
 
 def _get_execution_context():
     argParser = ArgumentParser()
     argParser.add_argument('-s', '--source', required=True,
                            help="Source folder with files, which needs to be splitted.")
-    argParser.add_argument('-o', '--output', required=True,
+    argParser.add_argument('-o', '--output', required=True, default=os.path.join(os.path.dirname(__file__), 'OUTPUT'),
                            help="Output folder where splitted files will be.")
 
     argParser.add_argument('-m', '--move', dest='transfer_policy', action='store_const',
