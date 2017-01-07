@@ -59,7 +59,11 @@ def get_original_date(imgPath):
         tags = exifread.process_file(f, stop_tag=DATE_TIME_ORIGINAL, details=False)
         for tag in ALLOWED_EXIF_TAGS_ORDER:
             if tag in tags:
-                date = time.strptime(tags[tag].values, DATE_TIME_ORIGINAL_PATTERN)
+                v = tags[tag].values
+                try:
+                    date = time.strptime(v, DATE_TIME_ORIGINAL_PATTERN)
+                except ValueError:
+                    continue
 
     fileName = os.path.splitext(os.path.basename(imgPath))[0]
     for pattern in ENCODED_DATE_IN_NAME_PATTERNS:
