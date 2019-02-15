@@ -17,7 +17,7 @@ After script execution in output directory you will see folders separated by cre
 
 *-o, --output FOLDER*
   * Output folder where separated files will be.
-  * default: ./OUTPUT
+  * default: {SOURCE}_sorted
 
 *-m, --move*
   * Files will be moved from source folder into output folder.
@@ -26,8 +26,8 @@ After script execution in output directory you will see folders separated by cre
 *-c, --copy*
   * Files will be copied into output folder.
 
-*-e, --extensions*
-  * Log level for logger.
+*-ext, --extensions*
+  * File extenstions to process
   * default: process all
 
 *-p, --path_pattern*

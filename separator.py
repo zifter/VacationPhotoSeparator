@@ -91,7 +91,7 @@ def separate(context):
     for root, dirs, files in os.walk(context.source):
         for f in files:
             ext = os.path.splitext(f)[1].lower()
-            if not (context.ingore_extensions is None or ext in context.ingore_extensions):
+            if context.extensions is not None and ext in context.extensions:
                 g_logger.debug('Skip: %s' % f)
                 continue
 
@@ -154,9 +154,9 @@ def main():
 def _get_execution_context():
     arg_parser = ArgumentParser()
     arg_parser.add_argument('-s', '--source', required=True,
-                           help="Source folder with files, which needs to be splitted.")
+                           help="Source folder with files, which needs to be split.")
     arg_parser.add_argument('-o', '--output', default=None,
-                           help="Output folder where splitted files will be. By default will be place near source folder.")
+                           help="Output folder where split files will be. By default will be place near source folder.")
 
     arg_parser.add_argument('-m', '--move', dest='transfer_policy', action='store_const',
                            default=MoveFilePolicy(), const=MoveFilePolicy(),
@@ -168,7 +168,7 @@ def _get_execution_context():
     arg_parser.add_argument('-l', '--log_level', dest='log_level', choices=['debug', 'info', 'warning', 'error'],
                            default='info', help="Log level for logger.")
 
-    arg_parser.add_argument('-e', '--ingore_extensions', nargs='+', help="Ignore file extensions.")
+    arg_parser.add_argument('-ext', '--extensions', nargs='+', help="Ignore file extensions.")
     arg_parser.add_argument('-p', '--path_pattern', default='%Y/%m.%d', help="Pattern for output file path.")
 
     return arg_parser.parse_args()
