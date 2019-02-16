@@ -1,11 +1,12 @@
+import os
+import platform
 import time
 import shutil
-import os
-import exifread
 import logging
 from argparse import ArgumentParser
 from datetime import datetime
 
+import exifread
 
 # TODO add MOV file support
 
@@ -62,7 +63,9 @@ class MoveFilePolicy(object):
 def get_original_date(file_path):
     file_name = os.path.splitext(os.path.basename(file_path))[0]
 
-    return get_datetime_from_exif(file_path) or get_datetime_from_filename(file_name)
+    return get_datetime_from_exif(file_path) \
+           or get_datetime_from_filename(file_name) \
+           or get_creation_date(file_path)
 
 
 def get_datetime_from_exif(file_path):
@@ -83,6 +86,29 @@ def get_datetime_from_filename(file_name):
             return datetime.strptime(file_name, pattern)
         except ValueError:
             continue
+
+    return None
+
+
+def get_creation_date(file_path):
+    """
+    Try to get the date that a file was created, falling back to when it was
+    last modified if that isn't possible.
+    See http://stackoverflow.com/a/39501288/1709587 for explanation.
+    """
+    if platform.system() == 'Windows':
+        timestamp = min(os.path.getctime(file_path), os.path.getmtime(file_path))
+    else:
+        stat = os.stat(file_path)
+        try:
+            timestamp = stat.st_birthtime
+        except AttributeError:
+            # We're probably on Linux. No easy way to get creation dates here,
+            # so we'll settle for when its content was last modified.
+            timestamp = stat.st_mtime
+
+    if timestamp is not None:
+        return datetime.fromtimestamp(timestamp)
 
     return None
 
