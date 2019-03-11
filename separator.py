@@ -5,6 +5,7 @@ import shutil
 import logging
 from argparse import ArgumentParser
 from datetime import datetime
+import hashlib
 
 import exifread
 
@@ -113,7 +114,7 @@ def get_creation_date(file_path):
     return None
 
 
-def separate(context):
+def walk_in_source(context):
     for root, dirs, files in os.walk(context.source):
         for f in files:
             ext = os.path.splitext(f)[1].lower()
@@ -122,41 +123,80 @@ def separate(context):
                 continue
 
             img_path = os.path.join(root, f)
-            date = get_original_date(img_path)
+            yield img_path
 
-            if date is None:
-                g_logger.warning("Original Date did not detect: %s" % img_path)
-                continue
 
-            dest_folder = os.path.normpath(os.path.join(context.output, time.strftime(context.path_pattern, date.timetuple())))
-            dest_img_path = os.path.join(dest_folder, f)
+def separate(context):
+    for img_path in walk_in_source(context):
+        date = get_original_date(img_path)
 
-            skip_because_files_equals = False
-            while os.path.exists(dest_img_path):
-                # files are equal?
-                if os.stat(dest_img_path).st_size == os.stat(img_path).st_size and \
-                                get_original_date(dest_img_path) == date:
-                    skip_because_files_equals = True
-                    break
+        if date is None:
+            g_logger.warning("Original Date did not detect: %s" % img_path)
+            continue
 
-                (name, ext) = os.path.splitext(dest_img_path)
-                dest_img_path = "%s_DUPLICATE%s" % (name, ext)  # new name
+        dest_folder = os.path.normpath(
+            os.path.join(context.output, time.strftime(context.path_pattern, date.timetuple())))
+        dest_img_path = os.path.join(dest_folder, f)
 
-            if skip_because_files_equals:
-                g_logger.warning("DUPLICATED: %s == %s" % (dest_img_path, img_path))
-                try:
-                    context.transfer_policy.delete_duplicated(img_path)
-                except Exception as e:
-                    g_logger.error(e)
-                continue
+        skip_because_files_equals = False
+        while os.path.exists(dest_img_path):
+            # files are equal?
+            if os.stat(dest_img_path).st_size == os.stat(img_path).st_size and \
+                    get_original_date(dest_img_path) == date:
+                skip_because_files_equals = True
+                break
 
+            (name, ext) = os.path.splitext(dest_img_path)
+            dest_img_path = "%s_DUPLICATE%s" % (name, ext)  # new name
+
+        if skip_because_files_equals:
+            g_logger.warning("DUPLICATED: %s == %s" % (dest_img_path, img_path))
+            try:
+                context.transfer_policy.delete_duplicated(img_path)
+            except Exception as e:
+                g_logger.error(e)
+            continue
+
+        if not os.path.exists(dest_folder):
+            os.makedirs(dest_folder)
+
+        try:
+            context.transfer_policy.copy(img_path, dest_img_path)
+        except Exception as e:
+            g_logger.error(e)
+
+
+def remove_duplicated(context):
+    duplicated_sizes = {}
+    for img_path in walk_in_source(context):
+        duplicated_sizes.setdefault(os.stat(img_path).st_size, []).append(img_path)
+
+    duplicated_files = {}
+    for duplicate_candidate in duplicated_sizes.values():
+        if len(duplicate_candidate) > 1:
+            for candidate in duplicate_candidate:
+                m = hashlib.md5()
+                with open(candidate, 'rb') as f:
+                    for chunk in iter(lambda: f.read(4096), b""):
+                        m.update(chunk)
+
+                duplicated_files.setdefault(m.hexdigest(), []).append(candidate)
+
+    for k, v in duplicated_files.items():
+        if len(v) > 1:
+            to_remove = v[1:]
+            g_logger.info(to_remove)
+
+            dest = os.path.join(context.output, os.path.relpath(v[0], context.source))
+            dest_folder = os.path.abspath(os.path.join(dest, os.pardir))
             if not os.path.exists(dest_folder):
                 os.makedirs(dest_folder)
 
-            try:
-                context.transfer_policy.copy(img_path, dest_img_path)
-            except Exception as e:
-                g_logger.error(e)
+            g_logger.info('Copy {} to {}'.format(v[0], dest))
+            shutil.copy(v[0], dest)
+            for img in to_remove:
+                g_logger.info('Remove {}'.format(img))
+                # os.remove(img)
 
 
 def main():
@@ -173,26 +213,30 @@ def main():
 
     start_time = datetime.now()
     g_logger.info(" - [Start]")
-    separate(context)
+    context.action(context)
     g_logger.info(" - [End %s]" % (datetime.now() - start_time))
 
 
 def _get_execution_context():
     arg_parser = ArgumentParser()
+    arg_parser.add_argument('-sep', '--separate', dest='action',  action='store_const', const=separate, default=separate,
+                            help="Separate files by dates.")
+    arg_parser.add_argument('-rem', '--remove_duplicated', dest='action',  action='store_const', const=remove_duplicated,
+                            help="Remove duplicated files")
     arg_parser.add_argument('-s', '--source', required=True,
-                           help="Source folder with files, which needs to be split.")
+                            help="Source folder with files, which needs to be split.")
     arg_parser.add_argument('-o', '--output', default=None,
-                           help="Output folder where split files will be. By default will be place near source folder.")
+                            help="Output folder where split files will be. By default will be place near source folder.")
 
     arg_parser.add_argument('-m', '--move', dest='transfer_policy', action='store_const',
-                           default=MoveFilePolicy(), const=MoveFilePolicy(),
-                           help="Files will be moved from source folder into output folder. It's default value.")
+                            default=MoveFilePolicy(), const=MoveFilePolicy(),
+                            help="Files will be moved from source folder into output folder. It's default value.")
 
     arg_parser.add_argument('-c', '--copy', dest='transfer_policy', action='store_const', const=CopyFilePolicy(),
-                           help="Files will be copied into output folder.")
+                            help="Files will be copied into output folder.")
 
     arg_parser.add_argument('-l', '--log_level', dest='log_level', choices=['debug', 'info', 'warning', 'error'],
-                           default='info', help="Log level for logger.")
+                            default='info', help="Log level for logger.")
 
     arg_parser.add_argument('-ext', '--extensions', nargs='+', help="Ignore file extensions.")
     arg_parser.add_argument('-p', '--path_pattern', default='%Y/%m.%d', help="Pattern for output file path.")
