@@ -1,0 +1,16 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+
+[dev-packages]
+pytest = "6.2.5"
+parameterized = "0.7.0"
+
+[requires]
+python_version = "3.9"
+
+[scripts]
+test = "pytest"
