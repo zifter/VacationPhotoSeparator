@@ -1,13 +1,13 @@
 from datetime import datetime
 from parameterized import parameterized
 from entity import get_datetime_from_filename, Entity
-from paths import TEST_DATA
+from paths import TEST_DATA_DIR
 
 TEST_FILE = 'test_file.jpg'
-entity = Entity(TEST_DATA.joinpath('entity').joinpath(TEST_FILE))
+entity = Entity(TEST_DATA_DIR.joinpath('entity').joinpath(TEST_FILE))
 
 TEST_FILE2 = 'test_file2.jpg'
-entity2 = Entity(TEST_DATA.joinpath('entity').joinpath(TEST_FILE2))
+entity2 = Entity(TEST_DATA_DIR.joinpath('entity').joinpath(TEST_FILE2))
 
 
 @parameterized.expand([
