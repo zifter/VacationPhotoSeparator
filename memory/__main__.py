@@ -8,6 +8,11 @@ from .storage import MemoryStorage
 
 def get_context():
     arg_parser = ArgumentParser()
+    arg_parser.add_argument('--separate', dest='action', action='store_const', const='separate',
+                            help="Separate files by original date.")
+    arg_parser.add_argument('--remove-duplicated', dest='action', action='store_const', const='remove_duplicated',
+                            help="Remove all duplicated files.")
+
     arg_parser.add_argument('-s', '--source', required=True,
                             help="Source folder with files, which needs to be split.")
     arg_parser.add_argument('-o', '--output', default=None,
@@ -22,6 +27,7 @@ def get_context():
                             default='info', help="Log level for logger.")
 
     arg_parser.add_argument('-p', '--path_pattern', default='%Y/%m.%d', help="Pattern for output file path.")
+    arg_parser.add_argument('-i', '--ignore', action='append')
 
     return arg_parser.parse_args()
 
@@ -46,9 +52,14 @@ def main(context):
         policy = DebugFilePolicy()
 
     g_logger.info('%s to %s' % (source_dir, target_dir))
-    storage = MemoryStorage(source_dir, target_dir, policy)
-    storage.remove_duplicated()
-    storage.separate(context.path_pattern)
+
+    storage = MemoryStorage(source_dir, target_dir, policy, ignore_dirs=context.ignore)
+    if context.action == 'remove_duplicated':
+        storage.remove_duplicated()
+    elif context.action == 'separate':
+        storage.separate(context.path_pattern)
+    else:
+        assert False, context.action
 
 
 if __name__ == "__main__":
