@@ -3,8 +3,8 @@ from pathlib import Path
 
 from overrides import overrides
 
-from logger import g_logger
-from policy.base import FilePolicyBase
+from ..logger import g_logger
+from .base import FilePolicyBase
 
 
 class SafeFilePolicy(FilePolicyBase):
@@ -19,7 +19,7 @@ class SafeFilePolicy(FilePolicyBase):
 
         if not dest.parent.exists():
             g_logger.debug("create dir: %s" % dest.parent)
-            dest.parent.mkdir()
+            dest.parent.mkdir(parents=True)
 
         shutil.copy(src, dest)
 
@@ -27,14 +27,15 @@ class SafeFilePolicy(FilePolicyBase):
     def delete(self, source_dir: Path, dest: Path):
         relative = dest.relative_to(source_dir)
 
-        move_to = self.safe_dir.joinpath(relative)
+        move_to = self.safe_dir.joinpath('deleted').joinpath(relative)
 
         if not move_to.parent.exists():
-            move_to.parent.mkdir()
+            move_to.parent.mkdir(parents=True)
 
         i = 0
         while move_to.exists():
-            move_to = move_to.rename(move_to.name + f'_duplicated_{i}')
+            move_to = move_to.with_name(move_to.stem + f'_duplicated_{i}' + move_to.suffix)
             i += 1
 
-        shutil.copy(dest, move_to)
+        g_logger.info("move: %s -> %s" % (dest, dest))
+        shutil.move(dest, move_to)

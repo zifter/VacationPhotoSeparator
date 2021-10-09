@@ -1,5 +1,5 @@
-from paths import TEST_DATA_DIR
-from utils import walk_in_folder
+from .paths import TEST_DATA_DIR
+from .utils import walk_in_folder
 
 TEST_SOURCE_DIR = TEST_DATA_DIR.joinpath('test_source')
 TEST_EMPTY_DIR = TEST_DATA_DIR.joinpath('empty_dir')

@@ -2,10 +2,10 @@ import os
 import time
 from pathlib import Path
 
-from entity import Entity
-from logger import g_logger
-from policy import FilePolicyBase
-from utils import walk_in_folder, timeit
+from .entity import Entity
+from .logger import g_logger
+from .policy import FilePolicyBase
+from .utils import walk_in_folder, timeit
 
 
 class MemoryStorage:
@@ -17,6 +17,8 @@ class MemoryStorage:
 
     @timeit
     def separate(self, path_pattern: str = '%Y/%m.%d'):
+        g_logger.info('separate')
+
         for img_path in walk_in_folder(source_dir=self.source_dir, ignore_ext=self.ignore_extentions):
             entity = Entity(img_path)
             date = entity.get_original_date()
@@ -48,6 +50,8 @@ class MemoryStorage:
 
     @timeit
     def remove_duplicated(self):
+        g_logger.info('remove duplicated')
+
         size_duplication = {}
         for img_path in walk_in_folder(source_dir=self.source_dir, ignore_ext=self.ignore_extentions):
             entity = Entity(img_path)

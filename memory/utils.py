@@ -5,7 +5,7 @@ from typing import Iterator, Set
 from functools import wraps
 from time import time
 
-from logger import g_logger
+from .logger import g_logger
 
 
 def walk_in_folder(source_dir: Path, ignore_ext: Set[str] = None) -> Iterator[Path]:
@@ -31,7 +31,7 @@ def timeit(f):
         ts = time()
         result = f(*args, **kw)
         te = time()
-        g_logger.info('func:%r args:[%r, %r] took: %2.4f sec', f.__name__, args, kw, te-ts)
+        g_logger.info('%r took: %2.4f sec', f.__name__, te-ts)
         return result
 
     return wrap
