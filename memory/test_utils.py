@@ -27,7 +27,7 @@ def test_walk_in_folder_get_all():
         assert result[i] == expected[i]
 
 
-def test_walk_in_folder_get_all_with_filter():
+def test_walk_in_folder_get_all_with_ext_filter():
     expected = sorted([
         TEST_SOURCE_DIR.joinpath('vacation/photo_2021-03-09_21-56-03.jpg'),
         TEST_SOURCE_DIR.joinpath('sort_me/Joke.jpg'),
@@ -37,6 +37,21 @@ def test_walk_in_folder_get_all_with_filter():
     ])
 
     result = sorted(walk_in_folder(TEST_SOURCE_DIR, ignore_ext={'.webp',}))
+
+    assert len(result) == len(expected)
+    for i in range(len(result)):
+        assert result[i] == expected[i]
+
+
+def test_walk_in_folder_ignore_dirs():
+    expected = sorted([
+        TEST_SOURCE_DIR.joinpath('vacation/photo_2021-03-09_21-56-03.jpg'),
+        TEST_SOURCE_DIR.joinpath('sort_me/Joke.jpg'),
+        TEST_SOURCE_DIR.joinpath('sort_me/image.png'),
+        TEST_SOURCE_DIR.joinpath('sort_me/1621918534125627841.webp'),
+    ])
+
+    result = sorted(walk_in_folder(TEST_SOURCE_DIR, ignore_dirs={'tmp',}))
 
     assert len(result) == len(expected)
     for i in range(len(result)):

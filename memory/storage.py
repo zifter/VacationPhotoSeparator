@@ -1,6 +1,7 @@
 import os
 import time
 from pathlib import Path
+from typing import Set
 
 from .entity import Entity
 from .logger import g_logger
@@ -9,9 +10,10 @@ from .utils import walk_in_folder, timeit
 
 
 class MemoryStorage:
-    def __init__(self, source_dir: Path, target_dir: Path, policy: FilePolicyBase):
+    def __init__(self, source_dir: Path, target_dir: Path, policy: FilePolicyBase, ignore_dirs: Set[str]=None):
         self.source_dir = source_dir
         self.target_dir = target_dir
+        self.ignore_dirs = ignore_dirs
         self.policy = policy
         self.ignore_extentions = set()
 
@@ -19,7 +21,7 @@ class MemoryStorage:
     def separate(self, path_pattern: str = '%Y/%m.%d'):
         g_logger.info('separate')
 
-        for img_path in walk_in_folder(source_dir=self.source_dir, ignore_ext=self.ignore_extentions):
+        for img_path in walk_in_folder(source_dir=self.source_dir, ignore_ext=self.ignore_extentions, ignore_dirs=self.ignore_dirs):
             entity = Entity(img_path)
             date = entity.get_original_date()
 
@@ -53,7 +55,7 @@ class MemoryStorage:
         g_logger.info('remove duplicated')
 
         size_duplication = {}
-        for img_path in walk_in_folder(source_dir=self.source_dir, ignore_ext=self.ignore_extentions):
+        for img_path in walk_in_folder(source_dir=self.source_dir, ignore_ext=self.ignore_extentions, ignore_dirs=self.ignore_dirs):
             entity = Entity(img_path)
             size_duplication.setdefault(entity.size, []).append(entity)
 
