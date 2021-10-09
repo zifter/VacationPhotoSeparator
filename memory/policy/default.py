@@ -4,8 +4,8 @@ from pathlib import Path
 
 from overrides import overrides
 
-from logger import g_logger
-from policy.base import FilePolicyBase
+from ..logger import g_logger
+from .base import FilePolicyBase
 
 
 class DefaultFilePolicy(FilePolicyBase):
@@ -15,7 +15,7 @@ class DefaultFilePolicy(FilePolicyBase):
 
         if not dest.parent.exists():
             g_logger.debug("create dir: %s" % dest.parent)
-            dest.parent.mkdir()
+            dest.parent.mkdir(parents=True)
 
         shutil.move(src, dest)
 

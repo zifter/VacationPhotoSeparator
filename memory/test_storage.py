@@ -1,9 +1,9 @@
 import tempfile
 from pathlib import Path
 
-from paths import TEST_DATA_DIR
-from policy import DebugFilePolicy
-from storage import MemoryStorage
+from .paths import TEST_DATA_DIR
+from .policy import DebugFilePolicy
+from .storage import MemoryStorage
 
 TEST_SOURCE_DIR = TEST_DATA_DIR.joinpath('test_source')
 

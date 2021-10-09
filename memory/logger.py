@@ -8,4 +8,4 @@ def setup_logger(name):
     return logger
 
 
-g_logger = setup_logger('separator')
+g_logger = setup_logger('memory')
