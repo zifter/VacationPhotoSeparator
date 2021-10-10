@@ -1,8 +1,9 @@
 from argparse import ArgumentParser
 from pathlib import Path
 
+from interactive_policy import ConsolePolicy
 from .logger import g_logger
-from .policy import DefaultFilePolicy, SafeFilePolicy, DebugFilePolicy, FilePolicyBase
+from .file_policy import DefaultFilePolicy, SafeFilePolicy, DebugFilePolicy, FilePolicyBase
 from .storage import MemoryStorage
 
 
@@ -18,7 +19,7 @@ def get_context():
     arg_parser.add_argument('-o', '--output', default=None,
                             help="Output folder where split files will be. By default will be place near source folder.")
 
-    arg_parser.add_argument('--safe', dest='transfer_policy', action='store_const', const='safe',
+    arg_parser.add_argument('--safe', dest='transfer_policy', action='store_const', const='safe', default='safe',
                             help="Files will be copied into output folder.")
     arg_parser.add_argument('--debug', dest='transfer_policy', action='store_const', const='debug',
                             help="Files will be copied into output folder.")
@@ -53,7 +54,10 @@ def main(context):
 
     g_logger.info('%s to %s' % (source_dir, target_dir))
 
-    storage = MemoryStorage(source_dir, target_dir, policy, ignore_dirs=context.ignore)
+    storage = MemoryStorage(source_dir, target_dir,
+                            policy, ConsolePolicy(),
+                            whitelist_extentions={'.jpg', '.avi', '.png', '.webp'},
+                            ignore_dirs=context.ignore)
     if context.action == 'remove_duplicated':
         storage.remove_duplicated()
     elif context.action == 'separate':
