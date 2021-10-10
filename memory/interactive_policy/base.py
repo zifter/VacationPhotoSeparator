@@ -8,5 +8,5 @@ class InteractivePolicyBase:
         pass
 
     @abc.abstractmethod
-    def choose_to_keep(self, files: List[Path]) -> Path:
+    def choose_to_keep(self, files: List[Path]) -> int:
         raise NotImplementedError()

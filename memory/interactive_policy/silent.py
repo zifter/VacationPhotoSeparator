@@ -7,5 +7,5 @@ from .base import InteractivePolicyBase
 
 class SilentPolicy(InteractivePolicyBase):
     @abc.abstractmethod
-    def choose_to_keep(self, files: List[Path]) -> Path:
-        return files[0]
+    def choose_to_keep(self, files: List[Path]) -> int:
+        return 0

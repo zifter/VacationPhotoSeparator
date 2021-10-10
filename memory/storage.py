@@ -96,8 +96,8 @@ class MemoryStorage:
             if len(v) == 1:
                 continue
 
-            keep = self.interactive.choose_to_keep(v)
-            v.remove(keep)
+            index = self.interactive.choose_to_keep([f.filepath for f in v])
+            v.pop(index)
 
             to_remove.extend(v)
 

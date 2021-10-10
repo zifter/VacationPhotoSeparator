@@ -52,4 +52,4 @@ def make_unique_path(path: Path):
 
 
 def is_ignored(path: Path, whitelist: Set[str]) -> bool:
-    return path.suffix not in whitelist
+    return path.suffix.lower() not in whitelist
