@@ -1,5 +1,7 @@
+from pathlib import Path
+
 from .paths import TEST_DATA_DIR
-from .utils import walk_in_folder
+from .utils import walk_in_folder, is_ignored
 
 TEST_SOURCE_DIR = TEST_DATA_DIR.joinpath('test_source')
 TEST_EMPTY_DIR = TEST_DATA_DIR.joinpath('empty_dir')
@@ -56,3 +58,9 @@ def test_walk_in_folder_ignore_dirs():
     assert len(result) == len(expected)
     for i in range(len(result)):
         assert result[i] == expected[i]
+
+
+def test_is_ignored():
+    path = Path('/home/test/1.jpg')
+    assert is_ignored(path, set())
+    assert is_ignored(path, {'.jpg', }) is False

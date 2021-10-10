@@ -40,3 +40,16 @@ def timeit(f):
         return result
 
     return wrap
+
+
+def make_unique_path(path: Path):
+    i = 0
+    while path.exists():
+        path = path.with_name(path.stem + f'_duplicated_{i}' + path.suffix)
+        i += 1
+
+    return path
+
+
+def is_ignored(path: Path, whitelist: Set[str]) -> bool:
+    return path.suffix not in whitelist

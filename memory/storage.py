@@ -1,32 +1,57 @@
-import os
 import time
 from pathlib import Path
 from typing import Set
 
+from .interactive_policy import InteractivePolicyBase
 from .entity import Entity
 from .logger import g_logger
-from .policy import FilePolicyBase
-from .utils import walk_in_folder, timeit
+from .file_policy import FilePolicyBase
+from .utils import walk_in_folder, timeit, is_ignored, make_unique_path
 
 
 class MemoryStorage:
-    def __init__(self, source_dir: Path, target_dir: Path, policy: FilePolicyBase, ignore_dirs: Set[str]=None):
+    def __init__(self, source_dir: Path,
+                 target_dir: Path,
+                 policy: FilePolicyBase,
+                 interactive: InteractivePolicyBase,
+                 ignore_dirs: Set[str] = None,
+                 ignore_extentions: Set[str] = None,
+                 whitelist_extentions: Set[str] = None,
+                 ):
         self.source_dir = source_dir
         self.target_dir = target_dir
-        self.ignore_dirs = ignore_dirs
-        self.policy = policy
-        self.ignore_extentions = set()
+        self.policy: FilePolicyBase = policy
+        self.interactive: InteractivePolicyBase = interactive
+
+        if ignore_dirs:
+            self.ignore_dirs = ignore_dirs
+        else:
+            self.ignore_dirs = set()
+
+        if ignore_extentions:
+            self.ignore_extentions = ignore_extentions
+        else:
+            self.ignore_extentions = set()
+
+        if whitelist_extentions:
+            self.whitelist_extentions = whitelist_extentions
+        else:
+            self.whitelist_extentions = set()
 
     @timeit
     def separate(self, path_pattern: str = '%Y/%m.%d'):
         g_logger.info('separate')
 
-        for img_path in walk_in_folder(source_dir=self.source_dir, ignore_ext=self.ignore_extentions, ignore_dirs=self.ignore_dirs):
-            entity = Entity(img_path)
+        for filepath in walk_in_folder(source_dir=self.source_dir, ignore_ext=self.ignore_extentions, ignore_dirs=self.ignore_dirs):
+            if is_ignored(filepath, whitelist=self.whitelist_extentions):
+                self.policy.blacklist_file(self.source_dir, filepath)
+                continue
+
+            entity = Entity(filepath)
             date = entity.get_original_date()
 
             if date is None:
-                g_logger.warning("Original Date did not detect: %s" % img_path)
+                self.policy.failed_to_detected_original_date(self.source_dir, filepath)
                 continue
 
             pattern = time.strftime(path_pattern, date.timetuple())
@@ -34,21 +59,20 @@ class MemoryStorage:
             dest_img_path = dest_folder.joinpath(entity.filename)
 
             is_duplicated = False
-            while os.path.exists(dest_img_path):
+            while dest_img_path.exists():
                 target_entity = Entity(dest_img_path)
 
                 if entity.is_equal(target_entity):
                     is_duplicated = True
                     break
 
-                (name, ext) = os.path.splitext(dest_img_path)
-                dest_img_path = "%s_DUPLICATE%s" % (name, ext)  # new name
+                dest_img_path = make_unique_path(dest_img_path)
 
             if is_duplicated:
-                g_logger.warning("DUPLICATED: %s == %s" % (dest_img_path, img_path))
-                self.policy.delete(self.source_dir, img_path)
+                g_logger.warning("DUPLICATED: %s == %s" % (dest_img_path, filepath))
+                self.policy.delete(self.source_dir, filepath)
             else:
-                self.policy.move(img_path, dest_img_path)
+                self.policy.move(filepath, dest_img_path)
 
     @timeit
     def remove_duplicated(self):
@@ -72,7 +96,10 @@ class MemoryStorage:
             if len(v) == 1:
                 continue
 
-            to_remove.extend(v[1:])
+            keep = self.interactive.choose_to_keep(v)
+            v.remove(keep)
+
+            to_remove.extend(v)
 
         g_logger.debug('duplicated files count', len(to_remove))
         g_logger.debug(to_remove)
