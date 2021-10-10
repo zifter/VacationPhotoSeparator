@@ -41,13 +41,13 @@ class SafeFilePolicy(FilePolicyBase):
 
     @overrides
     def move(self, src: Path, dest: Path):
-        g_logger.info("copy: %s -> %s" % (src, dest))
+        g_logger.info("move: %s -> %s" % (src, dest))
 
         if not dest.parent.exists():
             g_logger.debug("create dir: %s" % dest.parent)
             dest.parent.mkdir(parents=True)
 
-        shutil.copy(src, dest)
+        shutil.move(src, dest)
 
     @overrides
     def delete(self, source_dir: Path, dest: Path):

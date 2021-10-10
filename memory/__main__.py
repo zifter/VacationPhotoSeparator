@@ -1,7 +1,7 @@
 from argparse import ArgumentParser
 from pathlib import Path
 
-from interactive_policy import ConsolePolicy
+from .interactive_policy import ConsolePolicy
 from .logger import g_logger
 from .file_policy import DefaultFilePolicy, SafeFilePolicy, DebugFilePolicy, FilePolicyBase
 from .storage import MemoryStorage
@@ -56,7 +56,7 @@ def main(context):
 
     storage = MemoryStorage(source_dir, target_dir,
                             policy, ConsolePolicy(),
-                            whitelist_extentions={'.jpg', '.avi', '.png', '.webp'},
+                            whitelist_extentions={'.jpg', '.avi', '.png', '.webp', '.mp4', '.nef', '.mpg'},
                             ignore_dirs=context.ignore)
     if context.action == 'remove_duplicated':
         storage.remove_duplicated()
