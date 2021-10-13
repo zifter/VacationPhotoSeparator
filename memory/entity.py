@@ -3,6 +3,7 @@ import os
 import platform
 from datetime import datetime
 from pathlib import Path
+from typing import Optional
 
 import exifread
 
@@ -19,7 +20,7 @@ ENCODED_DATE_IN_NAME_PATTERNS = [
 ]
 
 
-def get_datetime_from_exif(file_path):
+def get_datetime_from_exif(file_path) -> Optional[datetime]:
     with open(file_path, 'rb') as f:
         tags = exifread.process_file(f, stop_tag=DATE_TIME_ORIGINAL, details=False)
         for tag in ALLOWED_EXIF_TAGS_ORDER:
@@ -29,6 +30,8 @@ def get_datetime_from_exif(file_path):
                     return datetime.strptime(v, DATE_TIME_ORIGINAL_PATTERN)
                 except ValueError:
                     continue
+
+    return None
 
 
 def get_datetime_from_filename(file_name):
