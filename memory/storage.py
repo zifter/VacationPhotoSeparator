@@ -91,17 +91,15 @@ class MemoryStorage:
             for entity in duplicate_candidate:
                 duplicated_files.setdefault(entity.hexdigest, []).append(entity)
 
-        to_remove = []
         for k, v in duplicated_files.items():
             if len(v) == 1:
                 continue
 
             index = self.interactive.choose_to_keep([f.filepath for f in v])
+            if index == -1:
+                continue
+
             v.pop(index)
 
-            to_remove.extend(v)
-
-        g_logger.debug('duplicated files count', len(to_remove))
-        g_logger.debug(to_remove)
-        for img in to_remove:
-            self.policy.delete(self.source_dir, img.filepath)
+            for img in v:
+                self.policy.delete(self.source_dir, img.filepath)
