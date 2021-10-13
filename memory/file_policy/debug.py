@@ -13,12 +13,12 @@ class DebugFilePolicy(FilePolicyBase):
 
     @overrides
     def blacklist_file(self, source_dir: Path, src: Path):
-        g_logger.debug("ignore file: %s" % src)
+        g_logger.debug("ignore file: %s", src)
 
     @overrides
     def move(self, src: Path, dest: Path):
-        g_logger.debug("move: %s -> %s" % (src, dest))
+        g_logger.debug("move: %s -> %s", src, dest)
 
     @overrides
     def delete(self, source_dir: Path, dest: Path):
-        g_logger.debug("delete: %s" % dest)
+        g_logger.debug("delete: %s", dest)

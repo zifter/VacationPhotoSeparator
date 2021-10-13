@@ -69,7 +69,7 @@ class MemoryStorage:
                 dest_img_path = make_unique_path(dest_img_path)
 
             if is_duplicated:
-                g_logger.warning("DUPLICATED: %s == %s" % (dest_img_path, filepath))
+                g_logger.warning("DUPLICATED: %s == %s", dest_img_path, filepath)
                 self.policy.delete(self.source_dir, filepath)
             else:
                 self.policy.move(filepath, dest_img_path)
@@ -91,7 +91,7 @@ class MemoryStorage:
             for entity in duplicate_candidate:
                 duplicated_files.setdefault(entity.hexdigest, []).append(entity)
 
-        for k, v in duplicated_files.items():
+        for _, v in duplicated_files.items():
             if len(v) == 1:
                 continue
 

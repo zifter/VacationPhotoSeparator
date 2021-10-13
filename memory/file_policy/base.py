@@ -2,10 +2,7 @@ import abc
 from pathlib import Path
 
 
-class FilePolicyBase(object):
-    def __init__(self):
-        pass
-
+class FilePolicyBase:
     @abc.abstractmethod
     def failed_to_detected_original_date(self,  source_dir: Path, src: Path):
         raise NotImplementedError()

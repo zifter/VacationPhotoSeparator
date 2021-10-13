@@ -52,7 +52,7 @@ def main(context):
     elif context.transfer_policy == 'debug':
         policy = DebugFilePolicy()
 
-    g_logger.info('%s to %s' % (source_dir, target_dir))
+    g_logger.info('%s to %s', source_dir, target_dir)
 
     storage = MemoryStorage(source_dir, target_dir,
                             policy, ConsolePolicy(),

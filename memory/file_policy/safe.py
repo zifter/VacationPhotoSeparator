@@ -29,19 +29,19 @@ class SafeFilePolicy(FilePolicyBase):
 
     @overrides
     def failed_to_detected_original_date(self, source_dir: Path, src: Path):
-        g_logger.info("failed to detect, move to safe zone: %s" % src)
+        g_logger.info("failed to detect, move to safe zone: %s", src)
 
         self._move_to_safe_zone('failed', source_dir, src)
 
     @overrides
     def blacklist_file(self, source_dir: Path, src: Path):
-        g_logger.info("ignore file: %s" % src)
+        g_logger.info("ignore file: %s", src)
 
         self._move_to_safe_zone('ignored', source_dir, src)
 
     @overrides
     def move(self, src: Path, dest: Path):
-        g_logger.info("move: %s -> %s" % (src, dest))
+        g_logger.info("move: %s -> %s", src, dest)
 
         if not dest.parent.exists():
             g_logger.debug("create dir: %s" % dest.parent)
@@ -51,6 +51,6 @@ class SafeFilePolicy(FilePolicyBase):
 
     @overrides
     def delete(self, source_dir: Path, dest: Path):
-        g_logger.info("delete, move to safe zone: %s" % dest)
+        g_logger.info("delete, move to safe zone: %s", dest)
 
         self._move_to_safe_zone('deleted', source_dir, dest)

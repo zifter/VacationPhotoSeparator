@@ -11,9 +11,9 @@ class ConsolePolicy(InteractivePolicyBase):
         while True:
             try:
                 print(f'>')
-                for i in range(len(files)):
-                    print(f'{i} - {files[i]}')
-                
+                for i, value in enumerate(files):
+                    print(f'{i} - {value}')
+
                 print(f'{-1} - keep all')
 
                 index = int(input("Give me a index to keep: "))
