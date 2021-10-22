@@ -1,10 +1,10 @@
 from argparse import ArgumentParser
 from pathlib import Path
 
-from .interactive_policy import ConsolePolicy
-from .logger import g_logger
-from .file_policy import DefaultFilePolicy, SafeFilePolicy, DebugFilePolicy, FilePolicyBase
-from .storage import MemoryStorage
+from memory.interactive_policy import ConsolePolicy
+from memory.logger import g_logger
+from memory.file_policy import DefaultFilePolicy, SafeFilePolicy, DebugFilePolicy, FilePolicyBase
+from memory.storage import MemoryStorage
 
 
 def get_context():

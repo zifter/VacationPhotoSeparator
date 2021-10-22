@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Set
 
 from .interactive_policy import InteractivePolicyBase
-from .entity import Entity
+from .file_entity import FileEntity
 from .logger import g_logger
 from .file_policy import FilePolicyBase
 from .utils import walk_in_folder, timeit, is_ignored, make_unique_path
@@ -47,7 +47,7 @@ class MemoryStorage:
                 self.policy.blacklist_file(self.source_dir, filepath)
                 continue
 
-            entity = Entity(filepath)
+            entity = FileEntity(filepath)
             date = entity.get_original_date()
 
             if date is None:
@@ -60,7 +60,7 @@ class MemoryStorage:
 
             is_duplicated = False
             while dest_img_path.exists():
-                target_entity = Entity(dest_img_path)
+                target_entity = FileEntity(dest_img_path)
 
                 if entity.is_equal(target_entity):
                     is_duplicated = True
@@ -80,7 +80,7 @@ class MemoryStorage:
 
         size_duplication = {}
         for img_path in walk_in_folder(source_dir=self.source_dir, ignore_ext=self.ignore_extentions, ignore_dirs=self.ignore_dirs):
-            entity = Entity(img_path)
+            entity = FileEntity(img_path)
             size_duplication.setdefault(entity.size, []).append(entity)
 
         duplicated_files = {}

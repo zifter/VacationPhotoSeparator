@@ -67,7 +67,7 @@ def get_creation_date(file_path):
     return None
 
 
-class Entity:
+class FileEntity:
     def __init__(self, filepath: Path):
         self.filepath: Path = filepath
 

@@ -40,6 +40,12 @@ After script execution in output directory you will see folders separated by cre
   * choices: debug, info, warning, error'
   * default: info
 
+## Contributing
+### Run tests
+```bash
+pyenv 
+```
+
 ## Additional information
 
 Creation time trying to spot two ways:
