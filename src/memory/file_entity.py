@@ -1,3 +1,4 @@
+import functools
 import hashlib
 import os
 import platform
@@ -8,6 +9,8 @@ from typing import Optional
 import exifread
 
 # TODO add MOV file support
+
+from memory.utils import make_new_name
 
 DATE_TIME_ORIGINAL_PATTERN = "%Y:%m:%d %H:%M:%S"
 DATE_TIME_ORIGINAL = 'DateTimeOriginal'
@@ -20,9 +23,18 @@ ENCODED_DATE_IN_NAME_PATTERNS = [
 ]
 
 
+@functools.cache
+def length(pattern: str) -> int:
+    # get length of expected pattern
+    return len(datetime.now().strftime(pattern))
+
+
 def get_datetime_from_exif(file_path) -> Optional[datetime]:
     with open(file_path, 'rb') as f:
         tags = exifread.process_file(f, stop_tag=DATE_TIME_ORIGINAL, details=False)
+        if not tags:
+            return None
+
         for tag in ALLOWED_EXIF_TAGS_ORDER:
             if tag in tags:
                 v = tags[tag].values
@@ -37,7 +49,7 @@ def get_datetime_from_exif(file_path) -> Optional[datetime]:
 def get_datetime_from_filename(file_name):
     for pattern in ENCODED_DATE_IN_NAME_PATTERNS:
         try:
-            return datetime.strptime(file_name, pattern)
+            return datetime.strptime(file_name[0:length(pattern)], pattern)
         except ValueError:
             continue
 
@@ -91,9 +103,19 @@ class FileEntity:
     def is_equal(self, entity) -> bool:
         return self.size == entity.size and self.hexdigest == self.hexdigest
 
-    def get_original_date(self) -> datetime:
-        file_name = os.path.splitext(os.path.basename(self.filepath))[0]
+    def with_name(self, pattern: str):
+        return make_new_name(self.filepath, pattern)
 
-        return get_datetime_from_exif(self.filepath) \
-               or get_datetime_from_filename(file_name) \
-               or get_creation_date(self.filepath)
+    def get_original_date(self) -> Optional[datetime]:
+        file_stem = self.filepath.stem
+
+        dates = [
+            get_datetime_from_exif(self.filepath),
+            get_datetime_from_filename(file_stem),
+            get_creation_date(self.filepath),
+        ]
+        for d in dates:
+            if d:
+                return d
+
+        return None

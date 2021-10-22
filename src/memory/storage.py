@@ -7,6 +7,7 @@ from .file_entity import FileEntity
 from .logger import g_logger
 from .file_policy import FilePolicyBase
 from .utils import walk_in_folder, timeit, is_ignored, make_unique_path
+from .video_entity import VideoEntity
 
 
 class MemoryStorage:
@@ -103,3 +104,16 @@ class MemoryStorage:
 
             for img in v:
                 self.policy.delete(self.source_dir, img.filepath)
+
+    @timeit
+    def video_compress(self):
+        g_logger.info('remove duplicated')
+
+        for img_path in walk_in_folder(source_dir=self.source_dir, ignore_ext=self.ignore_extentions, ignore_dirs=self.ignore_dirs):
+            if not VideoEntity.is_video(img_path):
+                continue
+
+            video = VideoEntity(img_path)
+            compressed_video = video.compress()
+
+            self.policy.delete(self.source_dir, compressed_video.filepath)

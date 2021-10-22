@@ -51,5 +51,10 @@ def make_unique_path(path: Path):
     return path
 
 
+def make_new_name(path: Path, pattern: str) -> Path:
+    pattern = pattern.format(stem=path.stem, ext=path.suffix)
+    return path.with_name(pattern)
+
+
 def is_ignored(path: Path, whitelist: Set[str]) -> bool:
     return path.suffix.lower() not in whitelist
