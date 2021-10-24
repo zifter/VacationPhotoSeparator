@@ -1,5 +1,4 @@
 import abc
-from pathlib import Path
 from typing import List
 
 from .base import InteractivePolicyBase
@@ -7,17 +6,17 @@ from .base import InteractivePolicyBase
 
 class ConsolePolicy(InteractivePolicyBase):
     @abc.abstractmethod
-    def choose_to_keep(self, files: List[Path]) -> int:
+    def select_choice(self, header: str, choices: List[str], by_default=0) -> int:
         while True:
             try:
-                print(f'>')
-                for i, value in enumerate(files):
+                print(header)
+                for i, value in enumerate(choices):
                     print(f'{i} - {value}')
 
-                print(f'{-1} - keep all')
+                print(f'{-1} - skip')
 
-                index = int(input("Give me a index to keep: "))
-                if index < -1 or index > len(files):
+                index = int(input("Give me a choice index: "))
+                if index < -1 or index > len(choices):
                     raise ValueError('')
 
                 return index

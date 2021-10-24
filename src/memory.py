@@ -13,6 +13,10 @@ def get_context():
                             help="Separate files by original date.")
     arg_parser.add_argument('--remove-duplicated', dest='action', action='store_const', const='remove_duplicated',
                             help="Remove all duplicated files.")
+    arg_parser.add_argument('--video-compress', dest='action', action='store_const', const='video_compress',
+                            help="Compress video files.")
+    arg_parser.add_argument('--video-overview', dest='action', action='store_const', const='video_overview',
+                            help="Overview video files.")
 
     arg_parser.add_argument('-s', '--source', required=True,
                             help="Source folder with files, which needs to be split.")
@@ -62,6 +66,10 @@ def main(context):
         storage.remove_duplicated()
     elif context.action == 'separate':
         storage.separate(context.path_pattern)
+    elif context.action == 'video_compress':
+        storage.video_compress()
+    elif context.action == 'video_overview':
+        storage.video_overview()
     else:
         assert False, context.action
 

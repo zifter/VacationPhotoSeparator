@@ -1,5 +1,4 @@
 import abc
-from pathlib import Path
 from typing import List
 
 from .base import InteractivePolicyBase
@@ -7,5 +6,5 @@ from .base import InteractivePolicyBase
 
 class SilentPolicy(InteractivePolicyBase):
     @abc.abstractmethod
-    def choose_to_keep(self, files: List[Path]) -> int:
-        return 0
+    def select_choice(self, header: str, files: List[str], by_default=0) -> int:
+        return by_default

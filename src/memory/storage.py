@@ -1,13 +1,14 @@
+import os
 import time
 from pathlib import Path
 from typing import Set
 
-from .interactive_policy import InteractivePolicyBase
-from .file_entity import FileEntity
-from .logger import g_logger
-from .file_policy import FilePolicyBase
-from .utils import walk_in_folder, timeit, is_ignored, make_unique_path
-from .video_entity import VideoEntity
+from memory.interactive_policy import InteractivePolicyBase
+from memory.entity import FileEntity
+from memory.entity import VideoEntity
+from memory.logger import g_logger
+from memory.file_policy import FilePolicyBase
+from memory.utils import walk_in_folder, timeit, is_ignored, make_unique_path, format_bytes, open_vlc
 
 
 class MemoryStorage:
@@ -96,7 +97,7 @@ class MemoryStorage:
             if len(v) == 1:
                 continue
 
-            index = self.interactive.choose_to_keep([f.filepath for f in v])
+            index = self.interactive.select_choice('> Choose file to keep', [str(f.filepath) for f in v])
             if index == -1:
                 continue
 
@@ -107,13 +108,59 @@ class MemoryStorage:
 
     @timeit
     def video_compress(self):
-        g_logger.info('remove duplicated')
+        g_logger.info('video compress')
 
-        for img_path in walk_in_folder(source_dir=self.source_dir, ignore_ext=self.ignore_extentions, ignore_dirs=self.ignore_dirs):
-            if not VideoEntity.is_video(img_path):
+        for f in walk_in_folder(source_dir=self.source_dir, ignore_ext=self.ignore_extentions, ignore_dirs=self.ignore_dirs):
+            if not VideoEntity.is_video(f):
                 continue
 
-            video = VideoEntity(img_path)
-            compressed_video = video.compress()
+            # Move open action to policy
+            open_vlc(f)
 
-            self.policy.delete(self.source_dir, compressed_video.filepath)
+            choices = [
+                video.get_original_resolution(),
+                video.get_compressed_resolution(),
+                'delete',
+            ]
+            index = self.interactive.select_choice(f'> Compress {video.filepath} size[{format_bytes(video.size)}]?', [str(c) for c in choices])
+
+            if index == -1:
+                continue
+
+            if choices[index] == 'delete':
+                self.policy.delete(self.source_dir, video.filepath)
+                continue
+
+            compressed_video = video.compress(choices[index])
+            if video.size > compressed_video.size:
+                g_logger.info('Keep compressed file')
+                self.policy.delete(self.source_dir, video.filepath)
+            else:
+                g_logger.info('Original file is smaller, keep original')
+                self.policy.delete(self.source_dir, compressed_video.filepath)
+
+    @timeit
+    def video_overview(self):
+        g_logger.info('video overview')
+
+        for f in walk_in_folder(source_dir=self.source_dir, ignore_ext=self.ignore_extentions, ignore_dirs=self.ignore_dirs):
+            if not VideoEntity.is_video(f):
+                continue
+
+            # Move open action to policy
+            open_vlc(f)
+
+            video = VideoEntity(f)
+            choices = [
+                'keep',
+                'delete',
+            ]
+            index = self.interactive.select_choice(f'> What to do {video.filepath} size[{format_bytes(video.size)}]?', choices)
+
+            if index == -1:
+                continue
+
+            if choices[index] == 'delete':
+                self.policy.delete(self.source_dir, video.filepath)
+            else:
+                continue

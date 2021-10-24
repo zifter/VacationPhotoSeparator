@@ -2,7 +2,7 @@ from datetime import datetime
 from parameterized import parameterized
 
 from .file_entity import get_datetime_from_filename, FileEntity
-from .paths import TEST_DATA_DIR
+from memory.paths import TEST_DATA_DIR
 
 TEST_FILE = 'test_file.jpg'
 entity = FileEntity(TEST_DATA_DIR.joinpath('entity').joinpath(TEST_FILE))

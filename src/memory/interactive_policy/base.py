@@ -1,5 +1,4 @@
 import abc
-from pathlib import Path
 from typing import List
 
 
@@ -8,5 +7,5 @@ class InteractivePolicyBase:
         pass
 
     @abc.abstractmethod
-    def choose_to_keep(self, files: List[Path]) -> int:
+    def select_choice(self, header: str, choices: List[str], by_default=0) -> int:
         raise NotImplementedError()
