@@ -14,7 +14,14 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v2
         with:
-          python-version: "3.x"
+          python-version: "3.9"
+
+      - uses: FedericoCarboni/setup-ffmpeg@v1
+        with:
+          # Not strictly necessary, but it may prevent rate limit
+          # errors especially on GitHub-hosted macos machines.
+          token: ${{ secrets.GITHUB_TOKEN }}
+        id: setup-ffmpeg
 
       - name: Install pipenv
         run: |
